@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".MainActivity">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/controlsLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/controlsLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Status Information -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/locationStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Location: Not Available"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/recordingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ready"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
+        <!-- Recording Timer -->
+        <TextView
+            android:id="@+id/recordingTimer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textAlignment="center"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
+        <!-- Control Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnStartStop"
+                android:layout_width="120dp"
+                android:layout_height="60dp"
+                android:text="Start Recording"
+                android:textSize="12sp"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btnSwitchCamera"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="📷"
+                android:textSize="20sp"
+                android:layout_marginStart="16dp"
+                android:backgroundTint="@android:color/darker_gray"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+
+        <!-- Location Update Frequency Settings -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location Update (frames):"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+
+            <Spinner
+                android:id="@+id/spinnerLocationFrequency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@android:color/white" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Permission Request Overlay -->
+    <LinearLayout
+        android:id="@+id/permissionOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@android:color/black"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Camera and Location permissions are required to use this app"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:layout_marginBottom="24dp" />
+
+        <Button
+            android:id="@+id/btnRequestPermissions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grant Permissions"
+            android:backgroundTint="@android:color/holo_blue_dark" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

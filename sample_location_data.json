@@ -1,0 +1,41 @@
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "video_filename": "VID_20241214_143022.mp4",
+  "start_time": 1702565422000,
+  "end_time": 1702565482000,
+  "total_frames": 1800,
+  "fps": 30,
+  "location_update_interval": 30,
+  "locations": [
+    {
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "altitude": 52.3,
+      "accuracy": 4.2,
+      "timestamp": 1702565422000,
+      "frame_start": 0,
+      "frame_end": 29,
+      "address": null
+    },
+    {
+      "latitude": 37.7750,
+      "longitude": -122.4195,
+      "altitude": 52.8,
+      "accuracy": 3.8,
+      "timestamp": 1702565423000,
+      "frame_start": 30,
+      "frame_end": 59,
+      "address": null
+    },
+    {
+      "latitude": 37.7751,
+      "longitude": -122.4196,
+      "altitude": 53.1,
+      "accuracy": 4.1,
+      "timestamp": 1702565424000,
+      "frame_start": 60,
+      "frame_end": 89,
+      "address": null
+    }
+  ]
+}

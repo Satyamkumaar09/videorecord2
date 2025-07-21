@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Exclude files that contain sensitive information -->
+    </cloud-backup>
+    <device-transfer>
+        <!-- Exclude files that contain sensitive information -->
+    </device-transfer>
+</data-extraction-rules>
