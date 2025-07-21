@@ -2,7 +2,9 @@ package com.example.videolocationtracker.camera
 
 import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.video.*
 import androidx.camera.video.VideoCapture
@@ -10,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.example.videolocationtracker.data.LocationData
 import com.example.videolocationtracker.data.VideoLocationSession
 import com.example.videolocationtracker.location.LocationManager
+import com.example.videolocationtracker.network.NetworkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +25,8 @@ class VideoRecordingManager(
     private val context: Context,
     private val locationManager: LocationManager
 ) {
+    
+    private val networkManager = NetworkManager(context)
     
     private val _isRecording = MutableStateFlow(false)
     val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
@@ -43,6 +48,7 @@ class VideoRecordingManager(
     private var sessionStartTime = 0L
     private var currentVideoFilename = ""
     private var sessionId = ""
+    private var currentVideoFile: File? = null
     
     fun setupVideoCapture(): VideoCapture<Recorder> {
         val recorder = Recorder.Builder()
@@ -95,7 +101,11 @@ class VideoRecordingManager(
                     is VideoRecordEvent.Finalize -> {
                         if (!recordEvent.hasError()) {
                             _recordingStatus.value = "Video saved successfully"
-                            saveLocationData()
+                            currentVideoFile = recordEvent.outputResults.outputUri?.let { uri ->
+                                // Convert URI to File for upload
+                                getFileFromUri(uri)
+                            }
+                            saveLocationDataAndUpload()
                         } else {
                             _recordingStatus.value = "Recording failed: ${recordEvent.error}"
                         }
@@ -157,7 +167,7 @@ class VideoRecordingManager(
         }
     }
     
-    private fun saveLocationData() {
+    private fun saveLocationDataAndUpload() {
         if (locationDataList.isEmpty()) return
         
         val session = VideoLocationSession(
@@ -171,9 +181,85 @@ class VideoRecordingManager(
             locations = locationDataList.toList()
         )
         
-        // Save to JSON file
+        // Save to JSON file locally first
         val jsonFileManager = JsonFileManager(context)
         jsonFileManager.saveLocationSession(session)
+        
+        // Upload to Django backend
+        uploadToServer(session)
+    }
+    
+    private fun uploadToServer(session: VideoLocationSession) {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                _recordingStatus.value = "Uploading data..."
+                
+                // Check if video file exists for upload
+                val videoFile = currentVideoFile
+                
+                if (videoFile != null && videoFile.exists()) {
+                    // Upload both location data and video
+                    val result = networkManager.uploadCompleteSession(
+                        session = session,
+                        videoFile = videoFile,
+                        onProgress = { progress ->
+                            _recordingStatus.value = progress
+                        }
+                    )
+                    
+                    result.fold(
+                        onSuccess = { (locationResponse, videoResponse) ->
+                            if (videoResponse != null) {
+                                _recordingStatus.value = "Upload completed successfully!"
+                            } else {
+                                _recordingStatus.value = "Location data uploaded, video upload failed"
+                            }
+                        },
+                        onFailure = { error ->
+                            _recordingStatus.value = "Upload failed: ${error.message}"
+                            Log.e("VideoRecordingManager", "Upload failed", error)
+                        }
+                    )
+                } else {
+                    // Upload only location data
+                    val result = networkManager.uploadLocationData(session)
+                    
+                    result.fold(
+                        onSuccess = { response ->
+                            _recordingStatus.value = "Location data uploaded successfully!"
+                        },
+                        onFailure = { error ->
+                            _recordingStatus.value = "Upload failed: ${error.message}"
+                            Log.e("VideoRecordingManager", "Location upload failed", error)
+                        }
+                    )
+                }
+                
+            } catch (e: Exception) {
+                _recordingStatus.value = "Upload error: ${e.message}"
+                Log.e("VideoRecordingManager", "Upload error", e)
+            }
+        }
+    }
+    
+    private fun getFileFromUri(uri: Uri): File? {
+        return try {
+            // For MediaStore URIs, we need to copy to a temporary file
+            // This is a simplified approach - in production you might want more robust handling
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val tempFile = File(context.cacheDir, currentVideoFilename)
+            
+            inputStream?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            
+            tempFile
+        } catch (e: Exception) {
+            Log.e("VideoRecordingManager", "Error converting URI to File", e)
+            null
+        }
     }
     
     private fun hasAudioPermission(): Boolean {

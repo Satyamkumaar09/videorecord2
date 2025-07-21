@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.videolocationtracker.camera.VideoRecordingManager
 import com.example.videolocationtracker.databinding.ActivityMainBinding
 import com.example.videolocationtracker.location.LocationManager
+import com.example.videolocationtracker.network.NetworkManager
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var locationManager: LocationManager
     private lateinit var videoRecordingManager: VideoRecordingManager
+    private lateinit var networkManager: NetworkManager
     private lateinit var cameraExecutor: ExecutorService
     
     private var cameraProvider: ProcessCameraProvider? = null
@@ -61,10 +63,12 @@ class MainActivity : AppCompatActivity() {
         // Initialize managers
         locationManager = LocationManager(this)
         videoRecordingManager = VideoRecordingManager(this, locationManager)
+        networkManager = NetworkManager(this)
         cameraExecutor = Executors.newSingleThreadExecutor()
         
         setupUI()
         checkPermissions()
+        checkServerConnection()
     }
     
     private fun setupUI() {
@@ -226,6 +230,23 @@ class MainActivity : AppCompatActivity() {
             "Camera and location permissions are required for this app to work",
             Toast.LENGTH_LONG
         ).show()
+    }
+    
+    private fun checkServerConnection() {
+        lifecycleScope.launch {
+            binding.serverStatus.text = "Checking..."
+            binding.serverStatus.setTextColor(ContextCompat.getColor(this@MainActivity, android.R.color.holo_orange_light))
+            
+            val isConnected = networkManager.checkServerConnection()
+            
+            if (isConnected) {
+                binding.serverStatus.text = "Connected"
+                binding.serverStatus.setTextColor(ContextCompat.getColor(this@MainActivity, android.R.color.holo_green_light))
+            } else {
+                binding.serverStatus.text = "Not Connected"
+                binding.serverStatus.setTextColor(ContextCompat.getColor(this@MainActivity, android.R.color.holo_red_light))
+            }
+        }
     }
     
     override fun onDestroy() {
