@@ -22,7 +22,7 @@ class NetworkManager(private val context: Context) {
     companion object {
         private const val TAG = "NetworkManager"
         // Replace with your Django server URL
-        private const val BASE_URL = "http://192.168.1.XXX:8000/" // Change XXX to your computer's IP
+        private const val BASE_URL = "http://YOUR_DJANGO_SERVER_IP:8000/" // Your Django server IP
         private const val TIMEOUT_SECONDS = 60L
     }
     
